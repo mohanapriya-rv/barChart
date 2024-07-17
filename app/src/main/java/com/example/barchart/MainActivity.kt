@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.barchart.ui.theme.BarChartTheme
 
@@ -44,10 +46,16 @@ fun DrawLines() {
         val canvasWidth = size.width
         val canvasHeight = size.height
 
-        val verticalpadding = 90f
+        val verticalpadding = 150f
         val horizontalPadding = 120f
         val lineCount = 10
-        // vertical baseLine
+
+        val paint = Paint().asFrameworkPaint().apply {
+            isAntiAlias = true
+            textSize = 40f
+            color = android.graphics.Color.BLACK
+
+        }
         drawLine(
             start = Offset(
                 verticalpadding,
@@ -57,15 +65,17 @@ fun DrawLines() {
             color = Color.Blue,
             strokeWidth = 7f
         )
-        // horizontal baseLine
-//        drawLine(
-//            start = Offset(verticalpadding, y = canvasHeight - horizontalPadding),
-//            end = Offset(canvasWidth - horizontalPadding, canvasHeight - horizontalPadding),
-//            color = Color.Blue,
-//            strokeWidth = 7f
-//        )
         for (i in 0..<lineCount) {
             val loopCount = i + 1
+            // Draw text before each line
+            val loopPercentage = loopCount * 10
+            drawContext.canvas.nativeCanvas.drawText(
+                "$loopPercentage%",
+                50f,
+                canvasHeight - horizontalPadding * loopCount,
+                paint
+            )
+
             drawLine(
                 start = Offset(
                     x = verticalpadding, y = canvasHeight - horizontalPadding * loopCount
