@@ -63,16 +63,13 @@ fun DrawChart() {
     val density = displayMetrics.density
     val screenHeightDp = screenHeightPx / density
     val halfScreenHeightDp = screenHeightDp / 2
-    val halfScreenHeightInPixels = halfScreenHeightDp * density
+    val bottomPadding = 120f
 
-
+    val halfScreenHeightInPixels = (halfScreenHeightDp * density)
     val screenWidthPx = displayMetrics.widthPixels
     val screenWidthDp = screenWidthPx / density
     val halfScreenWidthDp = screenWidthDp / 2
     val halfScreenWidthInPixels = halfScreenWidthDp * density
-
-    Log.e("priya", screenHeightDp.toString())
-    Log.e("priyaby2", (halfScreenHeightDp).toString())
     Canvas(
         modifier = Modifier
             .background(Color.Yellow)
@@ -96,31 +93,50 @@ fun DrawChart() {
             start = Offset(
                 startPosition, y = 0f
             ),
-            end = Offset(startPosition, halfScreenHeightInPixels),
+            end = Offset(startPosition, halfScreenHeightInPixels - bottomPadding),
             color = Color.Blue,
             strokeWidth = 7f
         )
 
+
+        val halfScreenHighPXAfterPadding = halfScreenHeightInPixels - bottomPadding
+        val individualIntervalCount = halfScreenHighPXAfterPadding / 10
+        Log.e("priyaindividualIntervalCount", individualIntervalCount.toString())
+
+        // bottomPadding for extra padding
         for (i in 0 until lineCount) {
-            val loopCount = i
-            val loopPercentage = (loopCount + 1) * 10
+            val loopCount = i + 1
+            // lines drwaing from top,,sor percentage calulated in reverse
+            val loopPercentage = (lineCount + 1 - loopCount) * 10
             drawContext.canvas.nativeCanvas.drawText(
                 "$loopPercentage%",
                 30f,
-                halfScreenHeightInPixels - (horizontalPadding * loopCount),
+                individualIntervalCount * loopCount,
                 paint
             )
+            Log.e("loopPercentage", loopPercentage.toString())
 
+            Log.e(
+                "priyaStart",
+                startPosition.toString().plus(" ")
+                    .plus(individualIntervalCount * loopCount)
+            )
+            Log.e(
+                "priyaend",
+                canvasWidth.toString().plus(" ")
+                    .plus(individualIntervalCount * loopCount)
+            )
             drawLine(
                 start = Offset(
                     x = startPosition,
-                    y = halfScreenHeightInPixels - (horizontalPadding * loopCount)
+                    y = individualIntervalCount * loopCount
                 ),
                 end = Offset(
                     canvasWidth,
-                    y = halfScreenHeightInPixels - (horizontalPadding * loopCount)
+                    y = individualIntervalCount * loopCount
                 ), color = Color.Blue, strokeWidth = 7f
             )
+
         }
 
 
@@ -128,19 +144,27 @@ fun DrawChart() {
         val rectHeightPx = screenHeightPx / lineCount
         var barHeightStartPadding = 50f
         for (i in 1 until lineCount) {
+            // 60 for intial space
             val barStartTopPosition = (rectWidthPx * (i) + 60)
-            Log.e("priyastartposition", barStartTopPosition.toString())
             val topLeft =
                 Offset(x = barStartTopPosition.toFloat(), y = barHeightStartPadding)
 
             val rectSize = Size(
                 width = rectWidthPx.toFloat() - horizontalBarPadding,
-                height = halfScreenHeightInPixels - barHeightStartPadding
+                height = halfScreenHeightInPixels - barHeightStartPadding - bottomPadding
             )
             drawRect(
                 color = Color.Magenta,
                 size = rectSize,
                 topLeft = topLeft
+            )
+            // halfScreenHeightInPixels - bottomPadding / 2, to place the bottom of view
+
+            drawContext.canvas.nativeCanvas.drawText(
+                "2000",
+                barStartTopPosition.toFloat(),
+                halfScreenHeightInPixels - bottomPadding / 2,
+                paint
             )
         }
 
@@ -193,8 +217,6 @@ fun DrawRect() {
                 x = barStartPosition, // Center horizontally
                 y = canvasHeight - horizontalPadding * 10// Bottom of the screen
             )
-
-            Log.e("priya", topLeft.toString())
 
             drawRect(
                 Color.Magenta, size = Size(
