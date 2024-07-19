@@ -149,15 +149,60 @@ fun DrawChart() {
             val topLeft =
                 Offset(x = barStartTopPosition.toFloat(), y = barHeightStartPadding)
 
+            Log.e("startXPostion", barStartTopPosition.toString())
+            Log.e("startYPostion", barHeightStartPadding.toString())
             val rectSize = Size(
                 width = rectWidthPx.toFloat() - horizontalBarPadding,
                 height = halfScreenHeightInPixels - barHeightStartPadding - bottomPadding
             )
             drawRect(
-                color = Color.Magenta,
+                color = Color.White,
                 size = rectSize,
                 topLeft = topLeft
             )
+            for (i in 1 until 4) {
+                val leftStartChildPadding = barHeightStartPadding * i
+                val topLeftOffSetPoint =
+                    Offset(x = barStartTopPosition.toFloat(), y = leftStartChildPadding)
+                Log.e("visaAcutalHeighr", halfScreenHeightInPixels.toString())
+                Log.e("visa", leftStartChildPadding.toString())
+                Log.e(
+                    "visaheight",
+                    (halfScreenHeightInPixels - barHeightStartPadding - bottomPadding).toString()
+                )
+
+                /**
+                 *  total heights for each bar needs to be subtracted from existing bar
+                 *  barheight =halfScreenHeightInPixels - barHeightStartPadding - bottomPadding
+                 *  leftStartChildPadding -> child's bar end position needs to be end postion of parent
+                 */
+
+
+                val rectSize = Size(
+                    width = rectWidthPx.toFloat() - horizontalBarPadding,
+                    height = ((halfScreenHeightInPixels - barHeightStartPadding - bottomPadding) - leftStartChildPadding)
+                )
+                var color = Color.Magenta
+                if (i == 1) {
+                    color = Color.Blue
+                } else if (i == 2) {
+                    color = Color.Red
+                } else if (i == 3) {
+                    color = Color.Green
+                } else if (i == 4) {
+                    color = Color.Magenta
+                }
+                Log.e("visarectsize", rectSize.toString())
+                Log.e("visarecttopleft", topLeftOffSetPoint.toString().plus("  ").plus(i))
+
+                drawRect(
+                    color = color,
+                    size = rectSize,
+                    topLeft = topLeftOffSetPoint
+                )
+                // Draw cap for the inner rectangle
+
+            }
             // halfScreenHeightInPixels - bottomPadding / 2, to place the bottom of view
 
             drawContext.canvas.nativeCanvas.drawText(
