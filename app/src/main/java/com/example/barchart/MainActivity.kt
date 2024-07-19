@@ -7,19 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -29,9 +23,10 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.barchart.ui.theme.BarChartTheme
+import com.example.barchart.ui.theme.HistoricalData
+import com.example.barchart.ui.theme.internalValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,14 +35,30 @@ class MainActivity : ComponentActivity() {
             BarChartTheme {
                 // A surface container using the 'background' color from the theme
 
-
+                val h = HistoricalData(
+                    "2000", internalValue(11000.00),
+                    internalValue(11000.00), internalValue(11000.00), internalValue(11000.00)
+                )
+                val h2 = HistoricalData(
+                    "2000", internalValue(0.00),
+                    internalValue(1000.00), internalValue(11000.00), internalValue(51000.00)
+                )
+                val h3 = HistoricalData(
+                    "2000", internalValue(4550.00),
+                    internalValue(100.00), internalValue(1100.00), internalValue(0.0)
+                )
+                val h4 = HistoricalData(
+                    "2000", internalValue(0.0),
+                    internalValue(110087.00), internalValue(110087.00), internalValue(110087.0)
+                )
+                val dataList = listOf(h4)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                         .fillMaxHeight()
                 ) {
-                    DrawChart()
+                    DrawChart(dataList)
                 }
             }
         }
@@ -56,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun DrawChart() {
+fun DrawChart(dataList: List<HistoricalData>) {
     val scrollState = rememberScrollState()
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val screenHeightPx = displayMetrics.heightPixels
@@ -82,6 +93,8 @@ fun DrawChart() {
         val canvasWidth = size.width
         val lineCount = 10
 
+        var barChartStartPosition = 100f
+        var barChartEndPosition = 1f
         val paint = Paint().asFrameworkPaint().apply {
             isAntiAlias = true
             textSize = 40f
@@ -98,112 +111,62 @@ fun DrawChart() {
             strokeWidth = 7f
         )
 
-
         val halfScreenHighPXAfterPadding = halfScreenHeightInPixels - bottomPadding
         val individualIntervalCount = halfScreenHighPXAfterPadding / 10
-        Log.e("priyaindividualIntervalCount", individualIntervalCount.toString())
-
         // bottomPadding for extra padding
         for (i in 0 until lineCount) {
             val loopCount = i + 1
             // lines drwaing from top,,sor percentage calulated in reverse
             val loopPercentage = (lineCount + 1 - loopCount) * 10
             drawContext.canvas.nativeCanvas.drawText(
-                "$loopPercentage%",
-                30f,
-                individualIntervalCount * loopCount,
-                paint
+                "$loopPercentage%", 30f, individualIntervalCount * loopCount, paint
             )
             Log.e("loopPercentage", loopPercentage.toString())
 
             Log.e(
                 "priyaStart",
-                startPosition.toString().plus(" ")
-                    .plus(individualIntervalCount * loopCount)
+                startPosition.toString().plus(" ").plus(individualIntervalCount * loopCount)
             )
             Log.e(
                 "priyaend",
-                canvasWidth.toString().plus(" ")
-                    .plus(individualIntervalCount * loopCount)
+                canvasWidth.toString().plus(" ").plus(individualIntervalCount * loopCount)
             )
+            barChartEndPosition = individualIntervalCount * loopCount
             drawLine(
                 start = Offset(
-                    x = startPosition,
-                    y = individualIntervalCount * loopCount
-                ),
-                end = Offset(
-                    canvasWidth,
-                    y = individualIntervalCount * loopCount
+                    x = startPosition, y = individualIntervalCount * loopCount
+                ), end = Offset(
+                    canvasWidth, y = individualIntervalCount * loopCount
                 ), color = Color.Blue, strokeWidth = 7f
             )
 
         }
 
+        val rectWidthPx = (screenWidthPx / lineCount).toFloat()
+        for (i in dataList.indices) {
+            // 60 for initial space
+            val barStartTopPosition = (rectWidthPx * (i) + 120).toFloat()
 
-        val rectWidthPx = screenWidthPx / lineCount
-        val rectHeightPx = screenHeightPx / lineCount
-        var barHeightStartPadding = 50f
-        for (i in 1 until lineCount) {
-            // 60 for intial space
-            val barStartTopPosition = (rectWidthPx * (i) + 60)
-            val topLeft =
-                Offset(x = barStartTopPosition.toFloat(), y = barHeightStartPadding)
-
-            Log.e("startXPostion", barStartTopPosition.toString())
-            Log.e("startYPostion", barHeightStartPadding.toString())
-            val rectSize = Size(
-                width = rectWidthPx.toFloat() - horizontalBarPadding,
-                height = halfScreenHeightInPixels - barHeightStartPadding - bottomPadding
-            )
-            drawRect(
-                color = Color.White,
-                size = rectSize,
-                topLeft = topLeft
-            )
-            for (i in 1 until 4) {
-                val leftStartChildPadding = barHeightStartPadding * i
-                val topLeftOffSetPoint =
-                    Offset(x = barStartTopPosition.toFloat(), y = leftStartChildPadding)
-                Log.e("visaAcutalHeighr", halfScreenHeightInPixels.toString())
-                Log.e("visa", leftStartChildPadding.toString())
-                Log.e(
-                    "visaheight",
-                    (halfScreenHeightInPixels - barHeightStartPadding - bottomPadding).toString()
-                )
-
-                /**
-                 *  total heights for each bar needs to be subtracted from existing bar
-                 *  barheight =halfScreenHeightInPixels - barHeightStartPadding - bottomPadding
-                 *  leftStartChildPadding -> child's bar end position needs to be end postion of parent
-                 */
+            val barTotalHeight = barChartEndPosition - barChartStartPosition
+            val data = dataList[i]
+            computeHeightPosition(data, barTotalHeight)
+            var currentTop = barChartStartPosition
 
 
-                val rectSize = Size(
-                    width = rectWidthPx.toFloat() - horizontalBarPadding,
-                    height = ((halfScreenHeightInPixels - barHeightStartPadding - bottomPadding) - leftStartChildPadding)
-                )
-                var color = Color.Magenta
-                if (i == 1) {
-                    color = Color.Blue
-                } else if (i == 2) {
-                    color = Color.Red
-                } else if (i == 3) {
-                    color = Color.Green
-                } else if (i == 4) {
-                    color = Color.Magenta
-                }
-                Log.e("visarectsize", rectSize.toString())
-                Log.e("visarecttopleft", topLeftOffSetPoint.toString().plus("  ").plus(i))
+            val assets = listOf(data.equity, data.debt, data.others, data.commodity)
+            assets.forEachIndexed { index, asset ->
+                val top = barStartTopPosition
 
+                val topLeftChildOffset = Offset(x = top, y = currentTop)
+                val rectSize =
+                    Size(width = rectWidthPx - horizontalBarPadding, height = asset.height)
                 drawRect(
-                    color = color,
-                    size = rectSize,
-                    topLeft = topLeftOffSetPoint
+                    color = getColorForAsset(index), size = rectSize, topLeft = topLeftChildOffset
                 )
-                // Draw cap for the inner rectangle
 
+                currentTop += asset.height
             }
-            // halfScreenHeightInPixels - bottomPadding / 2, to place the bottom of view
+
 
             drawContext.canvas.nativeCanvas.drawText(
                 "2000",
@@ -214,27 +177,33 @@ fun DrawChart() {
         }
 
     }
+}
 
+fun getColorForAsset(index: Int): Color {
+    return when (index) {
+        0 -> Color.Blue
+        1 -> Color.Gray
+        2 -> Color.Green
+        3 -> Color.Black
+        4 -> Color.Cyan
+        else -> Color.Magenta
+    }
+}
 
-//        // Draw rectangles (bars)
-//        for (i in 1 until 15) {
-//            var barStartPosition = verticalPadding + (i * 200)
-//            if (i != 1) {
-//                barStartPosition += 80f
-//            }
-//            val topLeft = Offset(
-//                x = barStartPosition, // Center horizontally
-//                y = canvasHeight - horizontalPadding * 10 - ((canvasHeight / 2) - 20f) // Positioned relative to canvas height
-//            )
-//
-//            Log.e("priya", topLeft.toString())
-//
-//            drawRect(
-//                Color.Magenta, size = Size(
-//                    width = rectWidth - horizontalPadding, height = (canvasHeight / 2) - 20f
-//                ), topLeft = topLeft
-//            )
-//        }
+fun computeHeightPosition(data: HistoricalData, barTotalHeight: Float) {
+    val totalAmount =
+        (data.equity.amount + data.debt.amount + data.others.amount + data.commodity.amount)
+    data.equity.height = getTotalHeight(data.equity.amount, totalAmount, barTotalHeight).toFloat()
+    data.debt.height = getTotalHeight(data.debt.amount, totalAmount, barTotalHeight).toFloat()
+    data.others.height = getTotalHeight(data.others.amount, totalAmount, barTotalHeight).toFloat()
+    data.commodity.height =
+        getTotalHeight(data.commodity.amount, totalAmount, barTotalHeight).toFloat()
+
+}
+
+fun getTotalHeight(amount: Double, totalAmount: Double, barTotalHeight: Float): Double {
+    val equityPer = amount / totalAmount
+    return equityPer * barTotalHeight
 }
 
 
@@ -327,3 +296,24 @@ fun GreetingPreview() {
 
     }
 }
+
+
+//        // Draw rectangles (bars)
+//        for (i in 1 until 15) {
+//            var barStartPosition = verticalPadding + (i * 200)
+//            if (i != 1) {
+//                barStartPosition += 80f
+//            }
+//            val topLeft = Offset(
+//                x = barStartPosition, // Center horizontally
+//                y = canvasHeight - horizontalPadding * 10 - ((canvasHeight / 2) - 20f) // Positioned relative to canvas height
+//            )
+//
+//            Log.e("priya", topLeft.toString())
+//
+//            drawRect(
+//                Color.Magenta, size = Size(
+//                    width = rectWidth - horizontalPadding, height = (canvasHeight / 2) - 20f
+//                ), topLeft = topLeft
+//            )
+//        }
