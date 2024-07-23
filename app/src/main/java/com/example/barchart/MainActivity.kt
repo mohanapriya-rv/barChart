@@ -1,25 +1,29 @@
 package com.example.barchart
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RichTooltipBox
 import androidx.compose.material3.RichTooltipColors
@@ -29,18 +33,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.barchart.ui.theme.BarChartTheme
@@ -48,6 +56,7 @@ import com.example.barchart.ui.theme.HistoricalData
 import com.example.barchart.ui.theme.internalValue
 import com.fundsindia.customComponent.TickOrientation
 import com.fundsindia.customComponent.ToolTipShape
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -106,29 +115,50 @@ class MainActivity : ComponentActivity() {
 fun TooltipWithRichContent(offset: Offset, text: String) {
     Log.e("priyaRichContent", offset.toString())
 
+//    Popup(
+//        offset = IntOffset(offset.x.toInt(), offset.y.toInt()),
+//        properties = PopupProperties(focusable = false)
+//    ) {
+//        RichTooltipBox(
+//            text = { /* Custom text content */ },
+//            modifier = Modifier.width(200.dp).height(200.dp),
+//            shape = TooltipDefaults.richTooltipContainerShape,
+//            colors = RichTooltipColors(
+//                containerColor = Color.Black,
+//                contentColor = Color.Magenta,
+//                actionContentColor = Color.Gray,
+//                titleContentColor = Color.Black
+//            )
+//        ) {
+//            Column(
+//                modifier = Modifier.wrapContentSize(),
+//                verticalArrangement = Arrangement.Top
+//            ) {
+//                Text(text = "Equity ₹25,000 (50%)")
+//                Text(text = "Debt ₹25,000 (10%)")
+//                Text(text = "Gold ₹2,000 (35%)")
+//                Text(text = "Others ₹500 (5%)")
+//            }
+//        }
+//    }
     Popup(
-        offset = IntOffset(offset.x.toInt(), offset.y.toInt()),
+        offset = IntOffset(offset.x.roundToInt(), offset.y.roundToInt()),
         properties = PopupProperties(focusable = false)
     ) {
-        RichTooltipBox(
-            text = { /* Custom text content */ },
-            modifier = Modifier.width(200.dp).height(200.dp),
-            shape = TooltipDefaults.richTooltipContainerShape,
-            colors = RichTooltipColors(
-                containerColor = Color.Black,
-                contentColor = Color.Magenta,
-                actionContentColor = Color.Gray,
-                titleContentColor = Color.Black
-            )
+        Box(
+            modifier = Modifier
+                .background(Color.Black, shape = RoundedCornerShape(10.dp))
+                .padding(10.dp)
+                .width(190.dp)
+                .height(80.dp)
         ) {
             Column(
-                modifier = Modifier.wrapContentSize(),
-                verticalArrangement = Arrangement.Top
+                modifier = Modifier.wrapContentSize(), verticalArrangement = Arrangement.Top
             ) {
-                Text(text = "Equity ₹25,000 (50%)")
-                Text(text = "Debt ₹25,000 (10%)")
-                Text(text = "Gold ₹2,000 (35%)")
-                Text(text = "Others ₹500 (5%)")
+                Text(text = "Equity ₹25,000 (50%)", color = Color.Magenta)
+                Text(text = "Debt ₹25,000 (10%)", color = Color.Magenta)
+                Text(text = "Gold ₹2,000 (35%)", color = Color.Magenta)
+                Text(text = "Others ₹500 (5%)", color = Color.Magenta)
             }
         }
     }
@@ -153,7 +183,8 @@ fun DrawChartNew(dataList: List<HistoricalData>) {
                 .width(200.dp),
             shape = TooltipDefaults.richTooltipContainerShape,
             colors = RichTooltipColors(
-                containerColor = Color.Black, contentColor = Color.Magenta,
+                containerColor = Color.Black,
+                contentColor = Color.Magenta,
                 actionContentColor = Color.Gray,
                 titleContentColor = Color.Black
             )
@@ -161,14 +192,10 @@ fun DrawChartNew(dataList: List<HistoricalData>) {
 
         ) {
             val shape = ToolTipShape(
-                cornerRadiusDp = 10.dp,
-                tickHeight = 15.dp,
-                tickOrientation = TickOrientation.START
+                cornerRadiusDp = 10.dp, tickHeight = 15.dp, tickOrientation = TickOrientation.START
             )
             Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Top
+                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top
             ) {
                 Text(text = "priya")
                 Text(text = "ramasamy")
@@ -202,7 +229,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
         mutableStateOf(Offset(0f, 0f))
     }
     if (showToolTip.value) {
-        TooltipWithRichContent(
+        TooltipWithArrow(
             offset = toolTipOffset.value,
             text = "Equity ₹25,000 (50%)\nDebt ₹25,000 (10%)\nGold ₹2,000 (35%)\nOthers ₹500 (5%)"
         )
@@ -299,9 +326,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
                 val rectSize =
                     Size(width = rectWidthPx - horizontalBarPadding, height = asset.height)
                 drawRect(
-                    color = getColorForAsset(index),
-                    size = rectSize,
-                    topLeft = topLeftChildOffset
+                    color = getColorForAsset(index), size = rectSize, topLeft = topLeftChildOffset
                 )
                 Log.e("TappedSize", rectSize.toString())
                 Log.e("TappedList", topLeftChildOffset.toString())
@@ -334,11 +359,9 @@ fun getColorForAsset(index: Int): Color {
 fun computeHeightPosition(data: HistoricalData, barTotalHeight: Float) {
     val totalAmount =
         (data.equity.amount + data.debt.amount + data.others.amount + data.commodity.amount)
-    data.equity.height =
-        getTotalHeight(data.equity.amount, totalAmount, barTotalHeight).toFloat()
+    data.equity.height = getTotalHeight(data.equity.amount, totalAmount, barTotalHeight).toFloat()
     data.debt.height = getTotalHeight(data.debt.amount, totalAmount, barTotalHeight).toFloat()
-    data.others.height =
-        getTotalHeight(data.others.amount, totalAmount, barTotalHeight).toFloat()
+    data.others.height = getTotalHeight(data.others.amount, totalAmount, barTotalHeight).toFloat()
     data.commodity.height =
         getTotalHeight(data.commodity.amount, totalAmount, barTotalHeight).toFloat()
 
@@ -440,22 +463,135 @@ fun GreetingPreview() {
     }
 }
 
+fun dpToPx(context: Context, dp: Float): Float {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics
+    )
+}
 
-//        // Draw rectangles (bars)
-//        for (i in 1 until 15) {
-//            var barStartPosition = verticalPadding + (i * 200)
-//            if (i != 1) {
-//                barStartPosition += 80f
-//            }
-//            val topLeft = Offset(
-//                x = barStartPosition, // Center horizontally
-//                y = canvasHeight - horizontalPadding * 10 - ((canvasHeight / 2) - 20f) // Positioned relative to canvas height
-//            )
-//
-//
-//            drawRect(
-//                Color.Magenta, size = Size(
-//                    width = rectWidth - horizontalPadding, height = (canvasHeight / 2) - 20f
-//                ), topLeft = topLeft
-//            )
-//        }
+
+@Composable
+fun TooltipWithArrow(offset: Offset, text: String) {
+    val formattedOffset = dpToPx(LocalContext.current, 350F)
+    Log.e("priyaLocalOffset", offset.toString())
+    Log.e("priyaformattedOffset", formattedOffset.toString())
+    Popup(
+        offset = IntOffset(
+            offset.x.roundToInt() - 400, offset.y.roundToInt() -200
+        ), properties = PopupProperties(focusable = false)
+    ) {
+        TooltipWithArrowAndContent(offset)
+    }
+}
+
+
+@Composable
+fun TooltipArrow() {
+    Canvas(
+        modifier = Modifier
+            .size(200.dp, 300.dp)
+            .background(Color.Green)
+    ) {
+        val path = Path().apply {
+            moveTo(0f, size.height)
+            lineTo(size.width / 2, size.height / 2)
+            lineTo(0f, 0f)
+            close()
+        }
+        drawPath(path, color = Color.White, style = Fill)
+        drawPath(path, color = Color.Blue, style = Stroke(width = 2f))
+    }
+}
+
+@Composable
+fun TooltipContent(text: String) {
+    Column(
+        modifier = Modifier
+            .background(Color.White, RoundedCornerShape(8.dp))
+            .padding(8.dp)
+            .widthIn(max = 200.dp)
+            .border(2.dp, Color.Blue, RoundedCornerShape(8.dp))
+    ) {
+        text.split("\n").forEach { line ->
+            Text(text = line, fontSize = 14.sp, color = Color.Black)
+        }
+    }
+}
+
+@Composable
+fun TooltipWithArrowAndContent(offset: Offset) {
+    Canvas(
+        modifier = Modifier
+            .width(150.dp)
+            .height(150.dp)
+    ) {
+        val cornerRadius = 16.dp.toPx()
+        val arrowWidth = 20.dp.toPx()
+        val arrowHeight = 10.dp.toPx()
+
+        val path = Path().apply {
+            // Start at the top-left corner
+            moveTo(cornerRadius, 0f)
+            lineTo(size.width - cornerRadius, 0f)
+            arcTo(
+                rect = Rect(
+                    size.width - cornerRadius * 2, 0f, size.width, cornerRadius * 2
+                ), startAngleDegrees = -90f, sweepAngleDegrees = 90f, forceMoveTo = false
+            )
+            lineTo(size.width, size.height / 2)
+            lineTo(size.width + arrowWidth, size.height / 2)
+            lineTo(size.width, size.height / 2 + arrowHeight)
+
+            lineTo(size.width, size.height - cornerRadius)
+            arcTo(
+                rect = Rect(
+                    size.width - cornerRadius * 2,
+                    size.height - cornerRadius * 2,
+                    size.width, size.height
+                ),
+                startAngleDegrees = 0f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+
+            lineTo(cornerRadius, size.height)
+            arcTo(
+                rect = Rect(
+                    0f, size.height - cornerRadius * 2,
+                    cornerRadius * 2, size.height
+                ),
+                startAngleDegrees = 90f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            lineTo(0f, cornerRadius)
+            arcTo(
+                rect = Rect(
+                    0f, 0f,
+                    cornerRadius * 2, cornerRadius * 2
+                ),
+                startAngleDegrees = 180f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            close()
+        }
+
+        drawPath(path, color = Color.White)
+        drawPath(path, color = Color.Blue, style = Stroke(width = 4f))
+
+        // Draw text content inside the tooltip
+        drawContext.canvas.nativeCanvas.apply {
+            val paint = android.graphics.Paint().apply {
+                textSize = 14.sp.toPx()
+                color = android.graphics.Color.BLACK
+            }
+            val textX = 16.dp.toPx()
+            val textY = 24.dp.toPx()
+            drawText("Equity ₹25,000 (50%)", textX, textY, paint)
+            drawText("Debt ₹25,000 (10%)", textX, textY + 20.dp.toPx(), paint)
+            drawText("Gold ₹2,000 (35%)", textX, textY + 40.dp.toPx(), paint)
+            drawText("Others ₹500 (5%)", textX, textY + 60.dp.toPx(), paint)
+        }
+    }
+}
