@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                     internalValue(110087.0)
                 )
 
-                val dataList = listOf(h, h2, h3, h4)
+                val dataList = listOf(h, h2, h3, h4, h, h2, h3, h4, h, h2, h3, h4)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -222,12 +222,13 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
     val halfScreenWidthDp = screenWidthDp / 2
     val halfScreenWidthInPixels = halfScreenWidthDp * density
     // val rectPositions = remember { mutableStateListOf<Pair<Offset, Size>>() }
-    val rectPositions = remember { mutableStateListOf<Float>() }
+    val rectPositions = remember { mutableStateListOf<Pair<Float, String>>() }
     val showToolTip = remember { mutableStateOf(false) }
 
     var toolTipOffset = remember {
         mutableStateOf(Offset(0f, 0f))
     }
+
     if (showToolTip.value) {
         TooltipWithArrow(
             offset = toolTipOffset.value,
@@ -244,7 +245,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
             detectTapGestures { tapOffset ->
                 for ((index, value) in rectPositions.withIndex()) {
                     val offset = tapOffset.x
-                    if (offset in (value)..(value + 48)) {
+                    if (offset in (value.first)..(value.first + 48)) {
                         Log.e("priya", tapOffset.toString())
                         toolTipOffset.value = tapOffset
                         showToolTip.value = true
@@ -332,7 +333,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
                 Log.e("TappedList", topLeftChildOffset.toString())
                 currentTop += asset.height
             }
-            rectPositions.add(barStartTopPosition)
+            rectPositions.add(Pair(barStartTopPosition, data.year))
 
             drawContext.canvas.nativeCanvas.drawText(
                 "2000",
@@ -477,7 +478,7 @@ fun TooltipWithArrow(offset: Offset, text: String) {
     Log.e("priyaformattedOffset", formattedOffset.toString())
     Popup(
         offset = IntOffset(
-            offset.x.roundToInt() - 400, offset.y.roundToInt() -200
+            offset.x.roundToInt() - 400, offset.y.roundToInt() - 200
         ), properties = PopupProperties(focusable = false)
     ) {
         TooltipWithArrowAndContent(offset)
@@ -523,7 +524,7 @@ fun TooltipWithArrowAndContent(offset: Offset) {
     Canvas(
         modifier = Modifier
             .width(150.dp)
-            .height(150.dp)
+            .height(80.dp)
     ) {
         val cornerRadius = 16.dp.toPx()
         val arrowWidth = 20.dp.toPx()
