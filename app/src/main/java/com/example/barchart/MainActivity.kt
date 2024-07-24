@@ -205,7 +205,6 @@ fun DrawChartNew(dataList: List<HistoricalData>) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
     val scrollState = rememberScrollState()
@@ -218,13 +217,12 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
 
     val halfScreenHeightInPixels = (halfScreenHeightDp * density)
     val screenWidthPx = displayMetrics.widthPixels
+    val screenWidthPxForBar = displayMetrics.widthPixels - 100
     val screenWidthDp = screenWidthPx / density
     val halfScreenWidthDp = screenWidthDp / 2
-    val halfScreenWidthInPixels = halfScreenWidthDp * density
-    // val rectPositions = remember { mutableStateListOf<Pair<Offset, Size>>() }
     val rectPositions = remember { mutableStateListOf<Pair<Float, String>>() }
     val showToolTip = remember { mutableStateOf(false) }
-
+    val startPosition = 120f
     var toolTipOffset = remember {
         mutableStateOf(Offset(0f, 0f))
     }
@@ -235,116 +233,113 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
             text = "Equity ₹25,000 (50%)\nDebt ₹25,000 (10%)\nGold ₹2,000 (35%)\nOthers ₹500 (5%)"
         )
     }
+    val lineCount = 10
+    val halfScreenHighPXAfterPadding = halfScreenHeightInPixels - bottomPadding
 
+    val individualIntervalCount = halfScreenHighPXAfterPadding / 10
+    Canvas(
+        modifier = Modifier
+            .background(Color.Magenta)
+            .width(45.dp)
+            .height(halfScreenHeightDp.dp)
 
-    Canvas(modifier = Modifier
-        .background(Color.Yellow)
-        .height(halfScreenHeightDp.dp)
-        .fillMaxWidth()
-        .pointerInput(Unit) {
-            detectTapGestures { tapOffset ->
-                for ((index, value) in rectPositions.withIndex()) {
-                    val offset = tapOffset.x
-                    if (offset in (value.first)..(value.first + 48)) {
-                        Log.e("priya", tapOffset.toString())
-                        toolTipOffset.value = tapOffset
-                        showToolTip.value = true
-                        break
-                    } else {
-                        showToolTip.value = false
-                    }
-                }
-            }
-        }) {
-        val horizontalBarPadding = 60f
-        val startPosition = 120f
-        val canvasWidth = size.width
-        val lineCount = 10
-        var barChartStartPosition = 100f
-        var barChartEndPosition = 1f
+    ) {
         val paint = Paint().asFrameworkPaint().apply {
             isAntiAlias = true
             textSize = 40f
             color = android.graphics.Color.BLACK
         }
-
-
-        // Draw lines
         drawLine(
-            start = Offset(
-                startPosition, y = 0f
-            ),
+            start = Offset(startPosition, y = 0f),
             end = Offset(startPosition, halfScreenHeightInPixels - bottomPadding),
-            color = Color.Blue,
+            color = Color.Black,
             strokeWidth = 7f
         )
-
-        val halfScreenHighPXAfterPadding = halfScreenHeightInPixels - bottomPadding
-        val individualIntervalCount = halfScreenHighPXAfterPadding / 10
-        // bottomPadding for extra padding
         for (i in 0 until lineCount) {
             val loopCount = i + 1
-            // lines drwaing from top,,sor percentage calulated in reverse
             val loopPercentage = (lineCount + 1 - loopCount) * 10
             drawContext.canvas.nativeCanvas.drawText(
                 "$loopPercentage%", 30f, individualIntervalCount * loopCount, paint
             )
-            Log.e("loopPercentage", loopPercentage.toString())
-
-            barChartEndPosition = individualIntervalCount * loopCount
-            drawLine(
-                start = Offset(
-                    x = startPosition, y = individualIntervalCount * loopCount
-                ), end = Offset(
-                    canvasWidth, y = individualIntervalCount * loopCount
-                ), color = Color.Blue, strokeWidth = 7f
-            )
-
         }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 45.dp)
+            .height(halfScreenHeightDp.dp)
+            .horizontalScroll(scrollState)
+    ) {
+        Canvas(modifier = Modifier
+            .width((dataList.size * (screenWidthPxForBar / 5)).toFloat().dp)
+            .height(halfScreenHeightDp.dp)
+            .background(Color.Yellow)
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    for ((index, value) in rectPositions.withIndex()) {
+                        val offset = tapOffset.x
+                        if (offset in (value.first)..(value.first + 48)) {
+                            Log.e("priya", tapOffset.toString())
+                            toolTipOffset.value = tapOffset
+                            showToolTip.value = true
+                            break
+                        } else {
+                            showToolTip.value = false
+                        }
+                    }
+                }
+            }) {
 
-        val barEligibleScreenWidthPx = screenWidthPx - startPosition
-        val rectWidthPx = (screenWidthPx / lineCount).toFloat()
-        for (i in dataList.indices) {
-            // 60 for initial space
-            /**
-             * 50f for extra padding
-             */
-            /**
-             * 50f for extra padding
-             */
-            val barStartTopPosition = ((rectWidthPx + 50f) * (i) + 180)
-            val barTotalHeight = barChartEndPosition - barChartStartPosition
-            val data = dataList[i]
-            computeHeightPosition(data, barTotalHeight)
-            var currentTop = barChartStartPosition
+            val canvasWidth = size.width
 
-
-            val assets = listOf(data.equity, data.debt, data.others, data.commodity)
-            assets.forEachIndexed { index, asset ->
-                val top = barStartTopPosition
-                Log.e("assets", top.toString())
-                val topLeftChildOffset = Offset(x = top, y = currentTop)
-                val rectSize =
-                    Size(width = rectWidthPx - horizontalBarPadding, height = asset.height)
-                drawRect(
-                    color = getColorForAsset(index), size = rectSize, topLeft = topLeftChildOffset
+            for (i in 0 until lineCount) {
+                val loopCount = i + 1
+                drawLine(
+                    start = Offset(x = 0f, y = individualIntervalCount * loopCount),
+                    end = Offset(canvasWidth, y = individualIntervalCount * loopCount),
+                    color = Color.Blue,
+                    strokeWidth = 7f
                 )
-                Log.e("TappedSize", rectSize.toString())
-                Log.e("TappedList", topLeftChildOffset.toString())
-                currentTop += asset.height
             }
-            rectPositions.add(Pair(barStartTopPosition, data.year))
 
-            drawContext.canvas.nativeCanvas.drawText(
-                "2000",
-                barStartTopPosition.toFloat(),
-                halfScreenHeightInPixels - bottomPadding / 2,
-                paint
-            )
+            val barChartStartPosition = 100f
+            val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
+            val barTotalHeight = barChartEndPosition - barChartStartPosition
+            val rectWidthPx = (screenWidthPx / 10).toFloat()
+            val paint = Paint().asFrameworkPaint().apply {
+                isAntiAlias = true
+                textSize = 40f
+                color = android.graphics.Color.BLACK
+            }
+            for (i in dataList.indices) {
+                val barStartTopPosition = ((rectWidthPx + 50f) * (i) + 180)
+                val data = dataList[i]
+                computeHeightPosition(data, barTotalHeight)
+                var currentTop = barChartStartPosition
+                val assets = listOf(data.equity, data.debt, data.others, data.commodity)
+                assets.forEachIndexed { index, asset ->
+                    val topLeftChildOffset = Offset(x = barStartTopPosition, y = currentTop)
+                    val rectSize = Size(width = rectWidthPx - 60f, height = asset.height)
+                    drawRect(
+                        color = getColorForAsset(index),
+                        size = rectSize,
+                        topLeft = topLeftChildOffset
+                    )
+                    currentTop += asset.height
+                }
+                rectPositions.add(Pair(barStartTopPosition, data.year))
+
+                drawContext.canvas.nativeCanvas.drawText(
+                    data.year,
+                    barStartTopPosition.toFloat(),
+                    halfScreenHeightInPixels - bottomPadding / 2,
+                    paint
+                )
+            }
         }
-
     }
 }
+
 
 fun getColorForAsset(index: Int): Color {
     return when (index) {
@@ -548,32 +543,22 @@ fun TooltipWithArrowAndContent(offset: Offset) {
                 rect = Rect(
                     size.width - cornerRadius * 2,
                     size.height - cornerRadius * 2,
-                    size.width, size.height
-                ),
-                startAngleDegrees = 0f,
-                sweepAngleDegrees = 90f,
-                forceMoveTo = false
+                    size.width,
+                    size.height
+                ), startAngleDegrees = 0f, sweepAngleDegrees = 90f, forceMoveTo = false
             )
 
             lineTo(cornerRadius, size.height)
             arcTo(
                 rect = Rect(
-                    0f, size.height - cornerRadius * 2,
-                    cornerRadius * 2, size.height
-                ),
-                startAngleDegrees = 90f,
-                sweepAngleDegrees = 90f,
-                forceMoveTo = false
+                    0f, size.height - cornerRadius * 2, cornerRadius * 2, size.height
+                ), startAngleDegrees = 90f, sweepAngleDegrees = 90f, forceMoveTo = false
             )
             lineTo(0f, cornerRadius)
             arcTo(
                 rect = Rect(
-                    0f, 0f,
-                    cornerRadius * 2, cornerRadius * 2
-                ),
-                startAngleDegrees = 180f,
-                sweepAngleDegrees = 90f,
-                forceMoveTo = false
+                    0f, 0f, cornerRadius * 2, cornerRadius * 2
+                ), startAngleDegrees = 180f, sweepAngleDegrees = 90f, forceMoveTo = false
             )
             close()
         }
