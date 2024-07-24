@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -217,7 +218,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
 
     val halfScreenHeightInPixels = (halfScreenHeightDp * density)
     val screenWidthPx = displayMetrics.widthPixels
-    val screenWidthPxForBar = displayMetrics.widthPixels - 100
+    val screenWidthPxForBar = displayMetrics.widthPixels - 300
     val screenWidthDp = screenWidthPx / density
     val halfScreenWidthDp = screenWidthDp / 2
     val rectPositions = remember { mutableStateListOf<Pair<Float, String>>() }
@@ -263,16 +264,20 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
             )
         }
     }
+    val canvaWidth = (dataList.size * (screenWidthPxForBar / 5)).toFloat().dp
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(screenWidthPxForBar.dp)
             .padding(start = 45.dp)
+            .background(Color.Yellow)
             .height(halfScreenHeightDp.dp)
             .horizontalScroll(scrollState)
     ) {
+        Log.e("canvaScreen", screenWidthPxForBar.toString())
+        Log.e("canvaUpdatedWidth", canvaWidth.toString())
         Canvas(modifier = Modifier
-            .width((dataList.size * (screenWidthPxForBar / 5)).toFloat().dp)
             .height(halfScreenHeightDp.dp)
+            .width(screenWidthPxForBar.dp)
             .background(Color.Yellow)
             .pointerInput(Unit) {
                 detectTapGestures { tapOffset ->
@@ -289,9 +294,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
                     }
                 }
             }) {
-
-            val canvasWidth = size.width
-
+            val canvasWidth = (dataList.size * (screenWidthPxForBar / 5)).toFloat()
             for (i in 0 until lineCount) {
                 val loopCount = i + 1
                 drawLine(
@@ -324,6 +327,18 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
                         color = getColorForAsset(index),
                         size = rectSize,
                         topLeft = topLeftChildOffset
+                    )
+                    drawRoundRect(
+                        color = getColorForAsset(index),
+                        topLeft = Offset(
+                            x = barStartTopPosition,
+                            y = currentTop - 15f
+                        ), // Adjusted position
+                        size = Size(rectWidthPx - 60f, 30f), // Adjusted size
+                        cornerRadius = CornerRadius(
+                            rectWidthPx ,
+                            rectWidthPx
+                        )
                     )
                     currentTop += asset.height
                 }
