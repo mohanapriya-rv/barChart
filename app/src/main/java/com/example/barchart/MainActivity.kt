@@ -312,7 +312,7 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
                 color = android.graphics.Color.BLACK
             }
             for (i in dataList.indices) {
-                val barStartTopPosition = ((rectWidthPx + 50f) * (i) + 180)
+                val barStartTopPosition = ((rectWidthPx + 50f) * (i) + 50)
                 val data = dataList[i]
                 computeHeightPosition(data, barTotalHeight)
                 var currentTop = barChartStartPosition
