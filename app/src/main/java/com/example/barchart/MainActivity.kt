@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                     internalValue(110087.0)
                 )
 
-                val dataList = listOf(h,h2,h3,h4,h,h2,h3,h4,h,h2,h3,h4,h,h2,h3,h4,h,h2,h3,h4)
+                val dataList = listOf(h,h2)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -113,7 +113,6 @@ class MainActivity : ComponentActivity() {
 
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,19 +181,31 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
         )
     }
     val rectWidthPx = 80f
-    val totalWidthInPixel = ((rectWidthPx + 50f) * dataList.size + 50)
+
+
+    val actualWidth = displayMetrics.widthPixels
+
+    var totalWidthInPixel = ((rectWidthPx + 50f) * dataList.size + 50)
     Log.e("ramasamyPx", totalWidthInPixel.toString())
+    if (totalWidthInPixel < actualWidth) {
+        totalWidthInPixel = actualWidth.toFloat()
+    }
+
+    val scrollModifier = if (totalWidthInPixel > actualWidth) {
+        Modifier.horizontalScroll(scrollState)
+    } else {
+        Modifier
+    }
 
     val screenWidthInDp = totalWidthInPixel / density
-    Log.e("ramasamyDp", (displayMetrics.widthPixels/density).toString())
+    Log.e("ramasamyDp", (displayMetrics.widthPixels / density).toString())
 
     Box(
-        modifier = Modifier
+        modifier = scrollModifier
             .width(screenWidthInDp.dp)
             .padding(start = 45.dp)
             .background(Color.Yellow)
             .height(halfScreenHeightDp.dp)
-            .horizontalScroll(scrollState)
     ) {
         Canvas(
             modifier = Modifier
