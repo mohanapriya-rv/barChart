@@ -9,7 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +32,7 @@ import androidx.compose.material3.RichTooltipColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +62,7 @@ import com.fundsindia.customComponent.TickOrientation
 import com.fundsindia.customComponent.ToolTipShape
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +99,7 @@ class MainActivity : ComponentActivity() {
                     internalValue(110087.0)
                 )
 
-                val dataList = listOf(h, h2, h3, h4, h, h2, h3, h4, h, h2, h3, h4)
+                val dataList = listOf(h,h2,h3,h4,h,h2,h3,h4,h,h2,h3,h4,h,h2,h3,h4,h,h2,h3,h4)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,59 +114,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TooltipWithRichContent(offset: Offset, text: String) {
-    Log.e("priyaRichContent", offset.toString())
-
-//    Popup(
-//        offset = IntOffset(offset.x.toInt(), offset.y.toInt()),
-//        properties = PopupProperties(focusable = false)
-//    ) {
-//        RichTooltipBox(
-//            text = { /* Custom text content */ },
-//            modifier = Modifier.width(200.dp).height(200.dp),
-//            shape = TooltipDefaults.richTooltipContainerShape,
-//            colors = RichTooltipColors(
-//                containerColor = Color.Black,
-//                contentColor = Color.Magenta,
-//                actionContentColor = Color.Gray,
-//                titleContentColor = Color.Black
-//            )
-//        ) {
-//            Column(
-//                modifier = Modifier.wrapContentSize(),
-//                verticalArrangement = Arrangement.Top
-//            ) {
-//                Text(text = "Equity ₹25,000 (50%)")
-//                Text(text = "Debt ₹25,000 (10%)")
-//                Text(text = "Gold ₹2,000 (35%)")
-//                Text(text = "Others ₹500 (5%)")
-//            }
-//        }
-//    }
-    Popup(
-        offset = IntOffset(offset.x.roundToInt(), offset.y.roundToInt()),
-        properties = PopupProperties(focusable = false)
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Black, shape = RoundedCornerShape(10.dp))
-                .padding(10.dp)
-                .width(190.dp)
-                .height(80.dp)
-        ) {
-            Column(
-                modifier = Modifier.wrapContentSize(), verticalArrangement = Arrangement.Top
-            ) {
-                Text(text = "Equity ₹25,000 (50%)", color = Color.Magenta)
-                Text(text = "Debt ₹25,000 (10%)", color = Color.Magenta)
-                Text(text = "Gold ₹2,000 (35%)", color = Color.Magenta)
-                Text(text = "Others ₹500 (5%)", color = Color.Magenta)
-            }
-        }
-    }
-}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -206,6 +156,7 @@ fun DrawChartNew(dataList: List<HistoricalData>) {
     }
 }
 
+
 @Composable
 fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
     val scrollState = rememberScrollState()
@@ -218,15 +169,11 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
 
     val halfScreenHeightInPixels = (halfScreenHeightDp * density)
     val screenWidthPx = displayMetrics.widthPixels
-    val screenWidthPxForBar = displayMetrics.widthPixels - 300
-    val screenWidthDp = screenWidthPx / density
-    val halfScreenWidthDp = screenWidthDp / 2
+
+
     val rectPositions = remember { mutableStateListOf<Pair<Float, String>>() }
     val showToolTip = remember { mutableStateOf(false) }
-    val startPosition = 120f
-    var toolTipOffset = remember {
-        mutableStateOf(Offset(0f, 0f))
-    }
+    val toolTipOffset = remember { mutableStateOf(Offset(0f, 0f)) }
 
     if (showToolTip.value) {
         TooltipWithArrow(
@@ -234,93 +181,73 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
             text = "Equity ₹25,000 (50%)\nDebt ₹25,000 (10%)\nGold ₹2,000 (35%)\nOthers ₹500 (5%)"
         )
     }
-    val lineCount = 10
-    val halfScreenHighPXAfterPadding = halfScreenHeightInPixels - bottomPadding
+    val rectWidthPx = 80f
+    val totalWidthInPixel = ((rectWidthPx + 50f) * dataList.size + 50)
+    Log.e("ramasamyPx", totalWidthInPixel.toString())
 
-    val individualIntervalCount = halfScreenHighPXAfterPadding / 10
-    Canvas(
-        modifier = Modifier
-            .background(Color.Magenta)
-            .width(45.dp)
-            .height(halfScreenHeightDp.dp)
+    val screenWidthInDp = totalWidthInPixel / density
+    Log.e("ramasamyDp", (displayMetrics.widthPixels/density).toString())
 
-    ) {
-        val paint = Paint().asFrameworkPaint().apply {
-            isAntiAlias = true
-            textSize = 40f
-            color = android.graphics.Color.BLACK
-        }
-        drawLine(
-            start = Offset(startPosition, y = 0f),
-            end = Offset(startPosition, halfScreenHeightInPixels - bottomPadding),
-            color = Color.Black,
-            strokeWidth = 7f
-        )
-        for (i in 0 until lineCount) {
-            val loopCount = i + 1
-            val loopPercentage = (lineCount + 1 - loopCount) * 10
-            drawContext.canvas.nativeCanvas.drawText(
-                "$loopPercentage%", 30f, individualIntervalCount * loopCount, paint
-            )
-        }
-    }
-    val canvaWidth = (dataList.size * (screenWidthPxForBar / 5)).toFloat().dp
     Box(
         modifier = Modifier
-            .width(screenWidthPxForBar.dp)
+            .width(screenWidthInDp.dp)
             .padding(start = 45.dp)
             .background(Color.Yellow)
             .height(halfScreenHeightDp.dp)
             .horizontalScroll(scrollState)
     ) {
-        Log.e("canvaScreen", screenWidthPxForBar.toString())
-        Log.e("canvaUpdatedWidth", canvaWidth.toString())
-        Canvas(modifier = Modifier
-            .height(halfScreenHeightDp.dp)
-            .width(screenWidthPxForBar.dp)
-            .background(Color.Yellow)
-            .pointerInput(Unit) {
-                detectTapGestures { tapOffset ->
-                    for ((index, value) in rectPositions.withIndex()) {
-                        val offset = tapOffset.x
-                        if (offset in (value.first)..(value.first + 48)) {
-                            Log.e("priya", tapOffset.toString())
-                            toolTipOffset.value = tapOffset
-                            showToolTip.value = true
-                            break
-                        } else {
-                            showToolTip.value = false
+        Canvas(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(screenWidthInDp.dp)
+                .background(Color.Magenta)
+                .pointerInput(Unit) {
+                    detectTapGestures { tapOffset ->
+                        for ((index, value) in rectPositions.withIndex()) {
+                            val offset = tapOffset.x
+                            if (offset in (value.first)..(value.first + 48)) {
+                                toolTipOffset.value = tapOffset
+                                showToolTip.value = true
+                                break
+                            } else {
+                                showToolTip.value = false
+                            }
                         }
                     }
                 }
-            }) {
-            val canvasWidth = (dataList.size * (screenWidthPxForBar / 5)).toFloat()
+        ) {
+            val halfScreenHeightInPixels = (displayMetrics.heightPixels / density / 2) * density
+            val bottomPadding = 120f
+            val barChartStartPosition = 100f
+            val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
+            val barTotalHeight = barChartEndPosition - barChartStartPosition
+            val rectWidthPx = (displayMetrics.widthPixels / 10).toFloat()
+            val lineCount = 10
+            val individualIntervalCount = (halfScreenHeightInPixels - bottomPadding) / 10
+
             for (i in 0 until lineCount) {
+                Log.e("priya", "inside line count")
                 val loopCount = i + 1
                 drawLine(
                     start = Offset(x = 0f, y = individualIntervalCount * loopCount),
-                    end = Offset(canvasWidth, y = individualIntervalCount * loopCount),
+                    end = Offset(
+                        totalWidthInPixel,
+                        y = individualIntervalCount * loopCount
+                    ),
                     color = Color.Blue,
                     strokeWidth = 7f
                 )
             }
 
-            val barChartStartPosition = 100f
-            val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
-            val barTotalHeight = barChartEndPosition - barChartStartPosition
-            val rectWidthPx = (screenWidthPx / 10).toFloat()
-            val paint = Paint().asFrameworkPaint().apply {
-                isAntiAlias = true
-                textSize = 40f
-                color = android.graphics.Color.BLACK
-            }
             for (i in dataList.indices) {
-                val barStartTopPosition = ((rectWidthPx + 50f) * (i) + 50)
+                val barStartTopPosition = ((rectWidthPx + 50f) * i + 50)
+                Log.e("priyarecWidth", rectWidthPx.toString())
+                Log.e("StartPosition", barStartTopPosition.toString())
                 val data = dataList[i]
                 computeHeightPosition(data, barTotalHeight)
                 var currentTop = barChartStartPosition
-                val assets = listOf(data.equity, data.debt, data.others, data.commodity)
-                assets.forEachIndexed { index, asset ->
+                val asset = listOf(data.equity, data.debt, data.others, data.commodity)
+                asset.forEachIndexed { index, asset ->
                     val topLeftChildOffset = Offset(x = barStartTopPosition, y = currentTop)
                     val rectSize = Size(width = rectWidthPx - 60f, height = asset.height)
                     drawRect(
@@ -333,26 +260,20 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
                         topLeft = Offset(
                             x = barStartTopPosition,
                             y = currentTop - 15f
-                        ), // Adjusted position
-                        size = Size(rectWidthPx - 60f, 30f), // Adjusted size
+                        ),
+                        size = Size(rectWidthPx - 60f, 30f),
                         cornerRadius = CornerRadius(
-                            rectWidthPx ,
+                            rectWidthPx,
                             rectWidthPx
                         )
                     )
                     currentTop += asset.height
                 }
-                rectPositions.add(Pair(barStartTopPosition, data.year))
-
-                drawContext.canvas.nativeCanvas.drawText(
-                    data.year,
-                    barStartTopPosition.toFloat(),
-                    halfScreenHeightInPixels - bottomPadding / 2,
-                    paint
-                )
+                rectPositions.add(Pair(barStartTopPosition, "type"))
             }
         }
     }
+
 }
 
 
