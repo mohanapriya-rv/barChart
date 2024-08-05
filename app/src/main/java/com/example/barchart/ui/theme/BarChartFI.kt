@@ -301,7 +301,7 @@ fun TooltipWithArrow(offset: Offset, text: String) {
             offset.x.roundToInt(), offset.y.roundToInt()
         ), properties = PopupProperties(focusable = false)
     ) {
-
+        TooltipWithArrowAndContent(offset)
     }
 }
 
