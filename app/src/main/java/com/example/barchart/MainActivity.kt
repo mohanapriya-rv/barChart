@@ -186,7 +186,6 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
     val actualWidth = displayMetrics.widthPixels
 
     var totalWidthInPixel = ((rectWidthPx + 50f) * dataList.size + 50)
-    Log.e("ramasamyPx", totalWidthInPixel.toString())
     if (totalWidthInPixel < actualWidth) {
         totalWidthInPixel = actualWidth.toFloat()
     }
@@ -198,7 +197,6 @@ fun DrawChart(dataList: List<HistoricalData>, callback: () -> Unit) {
     }
 
     val screenWidthInDp = totalWidthInPixel / density
-    Log.e("ramasamyDp", (displayMetrics.widthPixels / density).toString())
 
     Box(
         modifier = scrollModifier
