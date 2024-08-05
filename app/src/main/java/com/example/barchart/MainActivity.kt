@@ -55,9 +55,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.example.barchart.ui.theme.BarChartFI
 import com.example.barchart.ui.theme.BarChartTheme
 import com.example.barchart.ui.theme.HistoricalData
+import com.example.barchart.ui.theme.getHistoricalAssetAllocations
 import com.example.barchart.ui.theme.internalValue
+import com.example.barchart.ui.theme.processData
 import com.fundsindia.customComponent.TickOrientation
 import com.fundsindia.customComponent.ToolTipShape
 import kotlin.math.roundToInt
@@ -69,44 +72,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             BarChartTheme {
                 // A surface container using the 'background' color from the theme
-
-                val h = HistoricalData(
-                    "2000",
-                    internalValue(11000.00),
-                    internalValue(11000.00),
-                    internalValue(11000.00),
-                    internalValue(11000.00)
-                )
-                val h2 = HistoricalData(
-                    "2000",
-                    internalValue(0.00),
-                    internalValue(100.00),
-                    internalValue(11000000.00),
-                    internalValue(51000.00)
-                )
-                val h3 = HistoricalData(
-                    "2000",
-                    internalValue(4550.00),
-                    internalValue(100.00),
-                    internalValue(1100.00),
-                    internalValue(0.0)
-                )
-                val h4 = HistoricalData(
-                    "2000",
-                    internalValue(0.0),
-                    internalValue(110087.00),
-                    internalValue(110087.00),
-                    internalValue(110087.0)
-                )
-
-                val dataList = listOf(h,h2)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                         .fillMaxHeight()
                 ) {
-                    DrawChartNew(dataList)
+                    val data = processData(getHistoricalAssetAllocations(), LocalContext.current)
+                    BarChartFI(data, LocalContext.current)
                 }
             }
         }
