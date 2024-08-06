@@ -20,10 +20,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -117,7 +115,7 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
 
     val actualWidth = displayMetrics.widthPixels
     val rectWidthPx = 80f
-    var totalWidthInPixel = ((rectWidthPx + 50f) * dataList.size + 50)
+    var totalWidthInPixel = (108f * dataList.size) + 250
     if (totalWidthInPixel < actualWidth) {
         totalWidthInPixel = actualWidth.toFloat()
     }
@@ -129,7 +127,11 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
     }
 
     val screenWidthInDp = totalWidthInPixel / density
-    val screenWidthEndPadding = screenWidthInDp
+    Log.e("priyadataList", dataList.size.toString())
+
+    Log.e("priyaTotalPixel", totalWidthInPixel.toString())
+    Log.e("priyaTotalWidth", screenWidthInDp.toString())
+    val screenWidthEndPadding = totalWidthInPixel
     Canvas(
         modifier = Modifier
             .width(45.dp)
@@ -182,8 +184,7 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
     }
     Box(
         modifier = scrollModifier
-            .width(screenWidthEndPadding.dp)
-            .padding(start = 45.dp)
+            .width(screenWidthEndPadding.dp-100.dp)
             .height(halfScreenHeightDp.dp)
     ) {
         Canvas(modifier = Modifier
@@ -210,8 +211,8 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
                 val loopCount = i + 1
                 drawLine(
                     start = Offset(x = 0f, y = individualIntervalCount * loopCount), end = Offset(
-                        screenWidthPxForBar, y = individualIntervalCount * loopCount
-                    ), color = Color(context.getColor(R.color.purple_200)), strokeWidth = 3f
+                        totalWidthInPixel, y = individualIntervalCount * loopCount
+                    ), color = Color(context.getColor(R.color.black)), strokeWidth = 3f
                 )
             }
 
@@ -253,7 +254,7 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
                     yearTextPosition,
                     bottomPadding,
                     textColor = context.getColor(R.color.purple_200),
-                    typeFace =Typeface.DEFAULT
+                    typeFace = Typeface.DEFAULT
                 )
             }
 

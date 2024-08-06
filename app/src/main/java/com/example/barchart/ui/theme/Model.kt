@@ -143,5 +143,94 @@ fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
             others = 600.0,
             index = 2
         ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 3000.0,
+            debt = 200.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),  HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 900.0,
+            gold = 2500.0,
+            hybrid = 60000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2021",
+            equity = 30000.0,
+            debt = 2000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
     )
 }
