@@ -118,7 +118,8 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
 
     val actualWidth = displayMetrics.widthPixels
     val rectWidthPx = 80f
-    var totalWidthInPixel = (108f * dataList.size) + 250
+    // since intial offset of bar's starting from 200,so adding 208
+    var totalWidthInPixel = (108f * dataList.size) + 208
     if (totalWidthInPixel < actualWidth) {
         totalWidthInPixel = actualWidth.toFloat()
     }
@@ -133,16 +134,14 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
     val modifier = if (totalWidthInPixel > actualWidth) {
         Modifier
             .height(halfScreenHeightDp.dp)
-            .width(screenWidthEndPadding.dp - 200.dp)
+            .width(screenWidthEndPadding.dp)
             .padding(start = 50.dp)
-            .background(Color.Magenta)
             .horizontalScroll(rememberScrollState())
     } else {
         Modifier
             .height(halfScreenHeightDp.dp)
-            .width(screenWidthEndPadding.dp - 200.dp)
+            .width(screenWidthEndPadding.dp)
             .padding(start = 50.dp)
-            .background(Color.Magenta)
     }
     Canvas(
         modifier = Modifier
@@ -233,10 +232,10 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
             val barChartStartPosition = 100f
             val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
             val barTotalHeight = barChartEndPosition - barChartStartPosition
-            val rectWidthPx = 108f
+            val rectWidthPx = 120f
 
             for (i in dataList.indices) {
-                val barStartTopPosition = (208f * (i + 1))
+                val barStartTopPosition = (rectWidthPx * (i + 1))
                 Log.e("priyastart", barStartTopPosition.toString())
                 val data = dataList[i]
                 computeHeightPosition(data, barTotalHeight)
@@ -258,6 +257,7 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
                             )
                         )
                     }
+                    Log.e("priyaoffset", topLeftChildOffset.toString())
 
                     currentTop += asset.height
                 }

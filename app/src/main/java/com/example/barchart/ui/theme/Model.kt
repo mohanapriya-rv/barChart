@@ -124,7 +124,7 @@ data class HistoricalAssetAllocation(
 fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
     return listOf(
         HistoricalAssetAllocation(
-            year = "2020",
+            year = "2015",
             equity = 25000.0,
             debt = 25000.0,
             gold = 2000.0,
@@ -134,7 +134,47 @@ fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
             index = 1
         ),
         HistoricalAssetAllocation(
-            year = "2021",
+            year = "2016",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2017",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2018",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2019",
+            equity = 30000.0,
+            debt = 20000.0,
+            gold = 2500.0,
+            hybrid = 6000.0,
+            commodity = 3500.0,
+            others = 600.0,
+            index = 2
+        ),
+        HistoricalAssetAllocation(
+            year = "2020",
             equity = 30000.0,
             debt = 20000.0,
             gold = 2500.0,
@@ -154,47 +194,7 @@ fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
             index = 2
         ),
         HistoricalAssetAllocation(
-            year = "2021",
-            equity = 30000.0,
-            debt = 20000.0,
-            gold = 2500.0,
-            hybrid = 6000.0,
-            commodity = 3500.0,
-            others = 600.0,
-            index = 2
-        ),
-        HistoricalAssetAllocation(
-            year = "2021",
-            equity = 30000.0,
-            debt = 20000.0,
-            gold = 2500.0,
-            hybrid = 6000.0,
-            commodity = 3500.0,
-            others = 600.0,
-            index = 2
-        ),
-        HistoricalAssetAllocation(
-            year = "2021",
-            equity = 30000.0,
-            debt = 20000.0,
-            gold = 2500.0,
-            hybrid = 6000.0,
-            commodity = 3500.0,
-            others = 600.0,
-            index = 2
-        ),
-        HistoricalAssetAllocation(
-            year = "2021",
-            equity = 30000.0,
-            debt = 20000.0,
-            gold = 2500.0,
-            hybrid = 6000.0,
-            commodity = 3500.0,
-            others = 600.0,
-            index = 2
-        ),
-        HistoricalAssetAllocation(
-            year = "2021",
+            year = "2022",
             equity = 3000.0,
             debt = 200.0,
             gold = 2500.0,
@@ -203,7 +203,7 @@ fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
             others = 600.0,
             index = 2
         ),  HistoricalAssetAllocation(
-            year = "2021",
+            year = "2023",
             equity = 30000.0,
             debt = 900.0,
             gold = 2500.0,
@@ -213,7 +213,7 @@ fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
             index = 2
         ),
         HistoricalAssetAllocation(
-            year = "2021",
+            year = "2024",
             equity = 000.0,
             debt = 20000.0,
             gold = 2500.0,
@@ -223,7 +223,7 @@ fun getHistoricalAssetAllocations(): List<HistoricalAssetAllocation> {
             index = 2
         ),
         HistoricalAssetAllocation(
-            year = "2021",
+            year = "2025",
             equity = 30000.0,
             debt = 2000.0,
             gold = 2500.0,
