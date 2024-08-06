@@ -123,11 +123,6 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
         totalWidthInPixel = actualWidth.toFloat()
     }
 
-    val scrollModifier = if (totalWidthInPixel > actualWidth) {
-        Modifier.horizontalScroll(scrollState)
-    } else {
-        Modifier
-    }
 
     val screenWidthInDp = totalWidthInPixel / density
     Log.e("priyadataList", dataList.size.toString())
@@ -135,6 +130,20 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
     Log.e("priyaTotalPixel", totalWidthInPixel.toString())
     Log.e("priyaTotalWidth", screenWidthInDp.toString())
     val screenWidthEndPadding = totalWidthInPixel
+    val modifier = if (totalWidthInPixel > actualWidth) {
+        Modifier
+            .height(halfScreenHeightDp.dp)
+            .width(screenWidthEndPadding.dp - 200.dp)
+            .padding(start = 50.dp)
+            .background(Color.Magenta)
+            .horizontalScroll(rememberScrollState())
+    } else {
+        Modifier
+            .height(halfScreenHeightDp.dp)
+            .width(screenWidthEndPadding.dp - 200.dp)
+            .padding(start = 50.dp)
+            .background(Color.Magenta)
+    }
     Canvas(
         modifier = Modifier
             .width(45.dp)
@@ -185,103 +194,92 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
             strokeWidth = 4f
         )
     }
+
     Box(
-        modifier = Modifier
-            .width(screenWidthEndPadding.dp)
-            .padding(start = 50.dp)
-            .background(Color.Magenta)
-            .height(halfScreenHeightDp.dp)
+        modifier = modifier
     ) {
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .height(halfScreenHeightDp.dp)
-                .background(Color.Magenta)
-                .width(screenWidthEndPadding.dp)// Enable horizontal scrolling // Padding to start scroll from 100.dp
-        ) {
-            Canvas(modifier = Modifier
-                .height(halfScreenHeightDp.dp)
-                .width(screenWidthEndPadding.dp)
-                .pointerInput(Unit) {
-                    detectTapGestures { tapOffset ->
-                        for ((index, value) in rectPositions.withIndex()) {
-                            val offset = tapOffset.x
-                            if (offset in (value.first)..(value.first + 48)) {
-                                toolTipOffset.value = tapOffset
-                                selectedIndex.value = index
-                                showToolTip.value = true
-                                break
-                            } else {
-                                selectedIndex.value = -1
-                                showToolTip.value = false
-                            }
+        Canvas(modifier = Modifier
+            .height(halfScreenHeightDp.dp)
+            .width(screenWidthEndPadding.dp)
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    for ((index, value) in rectPositions.withIndex()) {
+                        val offset = tapOffset.x
+                        if (offset in (value.first)..(value.first + 48)) {
+                            toolTipOffset.value = tapOffset
+                            selectedIndex.value = index
+                            showToolTip.value = true
+                            break
+                        } else {
+                            selectedIndex.value = -1
+                            showToolTip.value = false
                         }
                     }
-                }) {
-
-                for (i in 0 until lineCount) {
-                    val loopCount = i + 1
-                    drawLine(
-                        start = Offset(x = 0f, y = individualIntervalCount * loopCount),
-                        end = Offset(
-                            totalWidthInPixel, y = individualIntervalCount * loopCount
-                        ),
-                        color = Color(context.getColor(R.color.black)),
-                        strokeWidth = 3f
-                    )
                 }
+            }) {
 
-                val barChartStartPosition = 100f
-                val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
-                val barTotalHeight = barChartEndPosition - barChartStartPosition
-                val rectWidthPx = 108f
-
-                for (i in dataList.indices) {
-                    val barStartTopPosition = (208f * (i + 1))
-                    Log.e("priyastart", barStartTopPosition.toString())
-                    val data = dataList[i]
-                    computeHeightPosition(data, barTotalHeight)
-                    var currentTop = individualIntervalCount
-                    val asset = dataList[i].segments
-                    asset.forEachIndexed { index, asset ->
-                        val topLeftChildOffset = Offset(x = barStartTopPosition, y = currentTop)
-                        val rectSize = Size(width = rectWidthPx - 80f, height = asset.height)
-                        drawRect(
-                            color = asset.color, size = rectSize, topLeft = topLeftChildOffset
-                        )
-                        if (asset.height > 0.0) {
-                            drawRoundRect(
-                                color = asset.color, topLeft = Offset(
-                                    x = barStartTopPosition, y = currentTop - 15f
-                                ),
-                                size = Size(rectWidthPx - 80f, 30f), cornerRadius = CornerRadius(
-                                    rectWidthPx, rectWidthPx
-                                )
-                            )
-                        }
-
-                        currentTop += asset.height
-                    }
-                    rectPositions.add(Pair(barStartTopPosition, dataList[i].title))
-
-                    drawLeftAlignedText(
-                        dataList[i].title,
-                        barStartTopPosition,
-                        yearTextPosition,
-                        bottomPadding,
-                        textColor = context.getColor(R.color.purple_200),
-                        typeFace = Typeface.DEFAULT
-                    )
-                }
-
-                drawEndAlignedText(
-                    text = "* as on Dec 31st for each year",
-                    screenWidthPxForBar = screenWidthPxForBar,
-                    halfScreenHeightInPixels = endYearPosition,
-                    bottomPadding = bottomPadding,
-                    textColor = context.getColor(R.color.purple_200)
+            for (i in 0 until lineCount) {
+                val loopCount = i + 1
+                drawLine(
+                    start = Offset(x = 0f, y = individualIntervalCount * loopCount),
+                    end = Offset(
+                        totalWidthInPixel, y = individualIntervalCount * loopCount
+                    ),
+                    color = Color(context.getColor(R.color.black)),
+                    strokeWidth = 3f
                 )
             }
+
+            val barChartStartPosition = 100f
+            val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
+            val barTotalHeight = barChartEndPosition - barChartStartPosition
+            val rectWidthPx = 108f
+
+            for (i in dataList.indices) {
+                val barStartTopPosition = (208f * (i + 1))
+                Log.e("priyastart", barStartTopPosition.toString())
+                val data = dataList[i]
+                computeHeightPosition(data, barTotalHeight)
+                var currentTop = individualIntervalCount
+                val asset = dataList[i].segments
+                asset.forEachIndexed { index, asset ->
+                    val topLeftChildOffset = Offset(x = barStartTopPosition, y = currentTop)
+                    val rectSize = Size(width = rectWidthPx - 80f, height = asset.height)
+                    drawRect(
+                        color = asset.color, size = rectSize, topLeft = topLeftChildOffset
+                    )
+                    if (asset.height > 0.0) {
+                        drawRoundRect(
+                            color = asset.color, topLeft = Offset(
+                                x = barStartTopPosition, y = currentTop - 15f
+                            ),
+                            size = Size(rectWidthPx - 80f, 30f), cornerRadius = CornerRadius(
+                                rectWidthPx, rectWidthPx
+                            )
+                        )
+                    }
+
+                    currentTop += asset.height
+                }
+                rectPositions.add(Pair(barStartTopPosition, dataList[i].title))
+
+                drawLeftAlignedText(
+                    dataList[i].title,
+                    barStartTopPosition,
+                    yearTextPosition,
+                    bottomPadding,
+                    textColor = context.getColor(R.color.purple_200),
+                    typeFace = Typeface.DEFAULT
+                )
+            }
+
+            drawEndAlignedText(
+                text = "* as on Dec 31st for each year",
+                screenWidthPxForBar = screenWidthPxForBar,
+                halfScreenHeightInPixels = endYearPosition,
+                bottomPadding = bottomPadding,
+                textColor = context.getColor(R.color.purple_200)
+            )
         }
     }
 }
