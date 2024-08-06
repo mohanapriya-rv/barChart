@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 
 import androidx.compose.runtime.Composable
@@ -117,37 +118,30 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
     }
 
     val actualWidth = displayMetrics.widthPixels
-    val rectWidthPx = 80f
-    // since intial offset of bar's starting from 200,so adding 208
-    var totalWidthInPixel = (108f * dataList.size) + 208
+    val rectWidthPx = 120f
+    val initialOffset = 208f
+    var totalWidthInPixel = (rectWidthPx * dataList.size) + initialOffset
     if (totalWidthInPixel < actualWidth) {
         totalWidthInPixel = actualWidth.toFloat()
     }
-
 
     val screenWidthInDp = totalWidthInPixel / density
     Log.e("priyadataList", dataList.size.toString())
 
     Log.e("priyaTotalPixel", totalWidthInPixel.toString())
     Log.e("priyaTotalWidth", screenWidthInDp.toString())
-    val screenWidthEndPadding = totalWidthInPixel
-    val modifier = if (totalWidthInPixel > actualWidth) {
-        Modifier
-            .height(halfScreenHeightDp.dp)
-            .width(screenWidthEndPadding.dp)
-            .padding(start = 50.dp)
-            .horizontalScroll(rememberScrollState())
-    } else {
-        Modifier
-            .height(halfScreenHeightDp.dp)
-            .width(screenWidthEndPadding.dp)
-            .padding(start = 50.dp)
-    }
+
+    val modifier = Modifier
+        .height(halfScreenHeightDp.dp)
+        .width(totalWidthInPixel.dp)
+        .padding(start = 50.dp)
+        .background(Color.Magenta)
+        .horizontalScroll(rememberScrollState())
+
     Canvas(
         modifier = Modifier
             .width(45.dp)
             .height(halfScreenHeightDp.dp)
-
     ) {
         drawLine(
             start = Offset(startPosition, y = 0f),
@@ -168,7 +162,6 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
         ) // Adjust the y position as needed
         val circleRadius = 20f
 
-
         drawCircle(
             color = Color(context.getColor(R.color.purple_500)), // Change to desired color
             radius = circleRadius, center = circleCenter
@@ -176,7 +169,6 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
 
         val arrowWidth = circleRadius / 4
         val arrowLineLength = circleRadius / 2
-        // Draw the top line of the arrow
 
         drawLine(
             color = Color.White,
@@ -185,7 +177,6 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
             strokeWidth = 4f
         )
 
-        // Draw the bottom line of the arrow
         drawLine(
             color = Color.White,
             start = Offset(circleCenter.x + arrowWidth, circleCenter.y + arrowLineLength),
@@ -194,12 +185,14 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
         )
     }
 
-    Box(
-        modifier = modifier
-    ) {
+    Log.e("priyaEndWidth", totalWidthInPixel.toString())
+    Log.e("priyaEndWidthINDP", (totalWidthInPixel / density).toString())
+
+    Box(modifier = modifier) {
         Canvas(modifier = Modifier
+            .width(1440.dp / density)
+            .background(Color.Red)
             .height(halfScreenHeightDp.dp)
-            .width(screenWidthEndPadding.dp)
             .pointerInput(Unit) {
                 detectTapGestures { tapOffset ->
                     for ((index, value) in rectPositions.withIndex()) {
@@ -232,7 +225,6 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
             val barChartStartPosition = 100f
             val barChartEndPosition = halfScreenHeightInPixels - bottomPadding
             val barTotalHeight = barChartEndPosition - barChartStartPosition
-            val rectWidthPx = 120f
 
             for (i in dataList.indices) {
                 val barStartTopPosition = (rectWidthPx * (i + 1))
