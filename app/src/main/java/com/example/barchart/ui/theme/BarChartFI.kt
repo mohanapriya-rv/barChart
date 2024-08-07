@@ -5,24 +5,17 @@ import android.content.Context
 import android.graphics.Typeface
 import android.util.Log
 import android.util.TypedValue
-import androidx.annotation.ColorRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 
 import androidx.compose.runtime.Composable
@@ -39,20 +32,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import androidx.core.content.res.ResourcesCompat
 import com.example.barchart.R
 import kotlin.math.roundToInt
 
@@ -95,8 +84,7 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
 
     if (showToolTip.value) {
         TooltipWithArrow(
-            offset = toolTipOffset.value,
-            text = "Equity ₹25,000 (50%)\nDebt ₹25,000 (10%)\nGold ₹2,000 (35%)\nOthers ₹500 (5%)"
+            offset = toolTipOffset.value, dataList[selectedIndex.value]
         )
     }
     val lineCount = 10
@@ -191,7 +179,6 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
     Box(modifier = modifier) {
         Canvas(modifier = Modifier
             .width(1440.dp / density)
-            .background(Color.Red)
             .height(halfScreenHeightDp.dp)
             .pointerInput(Unit) {
                 detectTapGestures { tapOffset ->
@@ -213,12 +200,9 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
             for (i in 0 until lineCount) {
                 val loopCount = i + 1
                 drawLine(
-                    start = Offset(x = 0f, y = individualIntervalCount * loopCount),
-                    end = Offset(
+                    start = Offset(x = 0f, y = individualIntervalCount * loopCount), end = Offset(
                         totalWidthInPixel, y = individualIntervalCount * loopCount
-                    ),
-                    color = Color(context.getColor(R.color.black)),
-                    strokeWidth = 3f
+                    ), color = Color(context.getColor(R.color.black)), strokeWidth = 3f
                 )
             }
 
@@ -243,8 +227,7 @@ fun DrawChartView(dataList: List<FISegmentBarChartModel>, context: Context) {
                         drawRoundRect(
                             color = asset.color, topLeft = Offset(
                                 x = barStartTopPosition, y = currentTop - 15f
-                            ),
-                            size = Size(rectWidthPx - 80f, 30f), cornerRadius = CornerRadius(
+                            ), size = Size(rectWidthPx - 80f, 30f), cornerRadius = CornerRadius(
                                 rectWidthPx, rectWidthPx
                             )
                         )
@@ -302,25 +285,44 @@ fun dpToPx(context: Context, dp: Float): Float {
 
 
 @Composable
-fun TooltipWithArrow(offset: Offset, text: String) {
+fun TooltipWithArrow(offset: Offset, segmentChart: FISegmentBarChartModel) {
     val formattedOffset = dpToPx(LocalContext.current, 350F)
     Popup(
         offset = IntOffset(
             offset.x.roundToInt(), offset.y.roundToInt()
         ), properties = PopupProperties(focusable = false)
     ) {
-        TooltipWithArrowAndContent(offset)
+        TooltipWithArrowAndContent(offset, segmentChart)
     }
 }
 
 
 @Composable
-fun TooltipWithArrowAndContent(offset: Offset) {
+fun TooltipWithArrowAndContent(offset: Offset, segmentChart: FISegmentBarChartModel) {
+    val paint = remember { android.graphics.Paint().apply { textSize = 14.sp.value } }
+
+    // Measure the size required for the text
+    val textPadding = 16.dp
+
+    val textBounds = android.graphics.Rect()
+    var maxWidth = 0f
+    var totalHeight = textPadding.value
+
+    segmentChart.segments.forEach { segment ->
+        val text = "${segment.name} ${segment.percentage} (100)"
+        paint.getTextBounds(text, 0, text.length, textBounds)
+        maxWidth = maxOf(maxWidth, textBounds.width().toFloat())
+        totalHeight += textBounds.height()
+    }
+
+    val canvasWidth = maxWidth + 2 * textPadding.value
+    val canvasHeight = totalHeight + textPadding.value
+
     Log.e("priya", offset.toString())
     Canvas(
         modifier = Modifier
-            .background(Color.Magenta)
-            .size(200.dp, 200.dp)
+            .width(canvasWidth.dp)
+            .height(canvasHeight.dp)
     ) {
         val cornerRadius = 16.dp.toPx()
         val arrowWidth = 20.dp.toPx()
@@ -366,8 +368,6 @@ fun TooltipWithArrowAndContent(offset: Offset) {
 
         drawPath(path, color = Color.White)
         drawPath(path, color = Color.Blue, style = Stroke(width = 4f))
-
-        // Draw text content inside the tooltip
         drawContext.canvas.nativeCanvas.apply {
             val paint = android.graphics.Paint().apply {
                 textSize = 14.sp.toPx()
@@ -375,10 +375,14 @@ fun TooltipWithArrowAndContent(offset: Offset) {
             }
             val textX = 16.dp.toPx()
             val textY = 24.dp.toPx()
-            drawText("Equity ₹25,000 (50%)", textX, textY, paint)
-            drawText("Debt ₹25,000 (10%)", textX, textY + 20.dp.toPx(), paint)
-            drawText("Gold ₹2,000 (35%)", textX, textY + 40.dp.toPx(), paint)
-            drawText("Others ₹500 (5%)", textX, textY + 60.dp.toPx(), paint)
+            val itemCount = 20.dp
+            segmentChart.segments.forEachIndexed { index, fi ->
+                val formattedText =
+                    fi.name.plus(" ").plus(fi.value).plus(" ").plus("(").plus(fi.percentage)
+                        .plus(")")
+                val position = itemCount * index
+                drawText(formattedText, textX, textY + (position).toPx(), paint)
+            }
         }
     }
 }
